@@ -1,0 +1,36 @@
+---
+- name: Backup Cisco Router Configuration
+  hosts: cisco_routers
+  gather_facts: false
+
+  tasks:
+
+    - name: Create backup directory on Ansible controller
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Check Cisco router connectivity
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: router_output
+
+    - name: Display router information
+      ansible.builtin.debug:
+        var: router_output.stdout_lines
+
+    - name: Backup running configuration
+      cisco.ios.ios_config:
+        backup: true
+        backup_options:
+          dir_path: "{{ playbook_dir }}/../backups"
+          filename: "{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M%S') }}.cfg"
+      register: backup_result
+
+    - name: Display backup location
+      ansible.builtin.debug:
+        var: backup_result.backup_path

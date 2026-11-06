@@ -1,0 +1,13 @@
+# Ansible
+*.retry
+
+# Backups
+backups/*
+
+# Secrets
+.env
+.vault_password
+
+# Python
+__pycache__/
+*.pyc
